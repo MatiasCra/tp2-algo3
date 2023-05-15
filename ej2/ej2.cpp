@@ -46,8 +46,8 @@ void dfs(int v, int marcar = 1, bool pushear = true) {
 int main() {
     leer_input();
 
-    // Recorro el grafo llenando el stack
-    color = vector<int>(n, 0);  // 0/false = sin color, 1/true = con color (visitado)
+    // Recorro el grafo llenando el stack.
+    color = vector<int>(n, 0);  // 0 = sin color, 1 = con color (visitado)
     for (int i = 0; i < n; ++i) {
         if (not color[i])
             dfs(i);
@@ -57,37 +57,28 @@ int main() {
     color = vector<int>(n, 0);          // Reseteo colores
     swap(aristas, aristas_invertidas);  // swapeo direcciones, O(1)
 
-    // Asigno un color distinto a cada componente fuertemente conexa
-    int componente = 0;  // color, incrementa en 1 antes de cada dfs
+    // Asigno un color distinto a cada componente fuertemente conexa.
+    int componente = 0;  // color de la componente, incrementa en 1 antes de cada dfs
     while (!procesados.empty()) {
         int v = procesados.top();
         procesados.pop();
         if (color[v] == 0) {
-            // dfs desde v con aristas invertidas, marcando componente
             dfs(v, ++componente, false);
         }
     }
+    swap(aristas, aristas_invertidas);  // Recupero aristas originales
 
-    // Creo grafo nuevo, colapsando cada cfc en un vertice
-    swap(aristas, aristas_invertidas);                // Recupero aristas originales
-    vector<list<int>> aristas_colapsado(componente);  // Componente = cantidad de cfcs
+    // Busco las raices del grafo de cfc (las cfc que no tienen entradas de otras cfc). Esas son en las que tengo que
+    // tirar una pieza.
+    vector<bool> es_raiz(componente, true);
     for (int desde = 0; desde < n; ++desde) {
         for (int hasta: aristas[desde]) {
-            aristas_colapsado[color[desde] - 1].push_back(color[hasta] - 1);  // Puede haber repetidas y loops
+            if (color[desde] != color[hasta])
+                es_raiz[color[hasta] - 1] = false;
         }
     }
 
-    // Busco las raices del grafo (las cfc que no tienen entradas de otras cfc). Esas son en las que tengo que tirar
-    // una pieza.
-    vector<bool> es_raiz(componente, true);
-    for (int desde = 0; desde < componente; ++desde) {
-        for (int hasta: aristas_colapsado[desde]) {
-            if (desde != hasta)
-                es_raiz[hasta] = false;
-        }
-    }
-
-    // Agrego una pieza por cfc raiz
+    // Agrego una pieza por cfc raiz.
     list<int> res;
     vector<bool> cfc_en_res(componente, false);
     for (int v = 0; v < n; ++v) {
