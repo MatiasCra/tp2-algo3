@@ -69,8 +69,8 @@ int main() {
     }
 
     // Creo grafo nuevo, colapsando cada cfc en un vertice
-    swap(aristas, aristas_invertidas);  // Recupero aristas originales
-    vector<list<int>> aristas_colapsado(componente);
+    swap(aristas, aristas_invertidas);                // Recupero aristas originales
+    vector<list<int>> aristas_colapsado(componente);  // Componente = cantidad de cfcs
     for (int desde = 0; desde < n; ++desde) {
         for (int hasta: aristas[desde]) {
             aristas_colapsado[color[desde] - 1].push_back(color[hasta] - 1);  // Puede haber repetidas y loops
