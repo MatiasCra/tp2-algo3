@@ -8,7 +8,6 @@ using namespace std;
 vector<list<int>> aristas;
 vector<list<int>> aristas_invertidas;
 vector<int> color;
-vector<int> padre;
 stack<int> procesados;
 int m = 0;
 int n = 0;
@@ -28,7 +27,7 @@ void leer_input() {
     }
 }
 
-void dfs(int v, int marcar = 1, bool pushear = true, bool guardar_padre = false) {
+void dfs(int v, int marcar = 1, bool pushear = true) {
     /*
      * Recorro por dfs el grafo recursivamente, marco los visitados con un color (número).
      * Si se indica, pusheo los nodos a un stack al terminar de procesarlos.
@@ -37,10 +36,7 @@ void dfs(int v, int marcar = 1, bool pushear = true, bool guardar_padre = false)
 
     for (int u: aristas[v]) {
         if (not color[u])
-            dfs(u, marcar, pushear, guardar_padre);
-
-        if (guardar_padre)
-            padre[u] = v;
+            dfs(u, marcar, pushear);
     }
 
     if (pushear)
@@ -77,33 +73,27 @@ int main() {
     vector<list<int>> aristas_colapsado(componente);
     for (int desde = 0; desde < n; ++desde) {
         for (int hasta: aristas[desde]) {
-            aristas_colapsado[color[desde] - 1].push_back(color[hasta] - 1);  // Puede haber repetidas
+            aristas_colapsado[color[desde] - 1].push_back(color[hasta] - 1);  // Puede haber repetidas y loops
         }
     }
 
-    vector<int> cfcs = color;
-    color = vector<int>(componente, 0);
-    padre = vector<int>(componente, 0);
-    componente = 0;
-    swap(aristas, aristas_colapsado);
-
-    for (int v = 0; v < n; ++v) {
-        if (color[cfcs[v] - 1] == 0) {
-            dfs(cfcs[v] - 1, ++componente, false, true);
+    // Busco las raices del grafo (las cfc que no tienen entradas de otras cfc). Esas son en las que tengo que tirar
+    // una pieza.
+    vector<bool> es_raiz(componente, true);
+    for (int desde = 0; desde < componente; ++desde) {
+        for (int hasta: aristas_colapsado[desde]) {
+            if (desde != hasta)
+                es_raiz[hasta] = false;
         }
     }
 
+    // Agrego una pieza por cfc raiz
     list<int> res;
-    swap(aristas, aristas_colapsado);  // Recupero aristas
-    vector<bool> cfc_procesado(componente, false);
+    vector<bool> cfc_en_res(componente, false);
     for (int v = 0; v < n; ++v) {
-        if (cfc_procesado[cfcs[v] - 1]) {
-            continue;
-        }
-
-        if (padre[cfcs[v] - 1] == 0) {
-            cfc_procesado[cfcs[v] - 1] = true;
+        if (es_raiz[color[v] - 1] and not cfc_en_res[color[v] - 1]) {
             res.push_back(v);
+            cfc_en_res[color[v] - 1] = true;
         }
     }
 
