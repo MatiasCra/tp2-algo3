@@ -21,6 +21,7 @@ vector<Estados> estado;
 vector<int> memo_cubren;
 vector<int> previo;
 int contador_por_comp_conexas = 0;
+vector<vector<long long>> memo_CB;
 
 void leer_input() {
     // Leo test de stdin, cargo las dimensiones, la lista de adyacencia e inicializo los arrays.
@@ -34,6 +35,7 @@ void leer_input() {
     memo_cubren = vector<int>(n, -1);
     previo = vector<int>(n, -1);
     treeEdges = vector<list<int>>(n);
+    memo_CB = vector<vector<long long>>(n + 1, vector<long long>(2 + 1, 0));
 
     // Leo aristas.
     for (int i = 0; i < m; ++i) {
@@ -86,9 +88,6 @@ void dfs(int v) {
 }
 
 long long calcular_CB(int w, int k) {
-
-    vector<vector<long long>> memo_CB(w + 1, vector<long long>(k + 1, 0));
-
     for (int i = 0; i <= w; ++i) {
         for (int j = 0; j <= min(i, k); ++j) {
             if (j == 0 || j == i) {
@@ -102,8 +101,6 @@ long long calcular_CB(int w, int k) {
 }
 
 int main() {
-    long long numerador_resultado = 0;
-    long long denominador_resultado;
     leer_input();  // Cargo input e inicializo estructuras
 
     // Me guardo las back-edges
@@ -125,11 +122,9 @@ int main() {
     for (int v = 0; v < n; ++v) {
         for (auto it = treeEdges[v].begin(); it != treeEdges[v].end(); ++it) {
             int u = *it;
-            auto aux = it;
-            if (not memo_cubren[u] and previo[u] == v) {
-                aux = prev(treeEdges[v].erase(it));
+            if ((not cubren(u) and previo[u] == v) or (not cubren(v) and previo[v] == u)) {
+                it = prev(treeEdges[v].erase(it));
             }
-            it = aux;
         }
     }
 
@@ -139,6 +134,8 @@ int main() {
 
     // Vuevlo a correr dfs por cc cuento la cantidad de nodos por cc y hago la sumatoria de los numeros combinatorios
     // (#cc ,2)
+    long long numerador_resultado = 0;
+    long long denominador_resultado = calcular_CB(n, 2);;
     swap(treeEdges, aristas);  // Para que dfs use los treeEdges. Swapeo de direccion en O(1).
     for (int i = 0; i < n; ++i) {
         if (estado[i] == NO_LO_VI) {
@@ -147,7 +144,6 @@ int main() {
             contador_por_comp_conexas = 0;
         }
     }
-    denominador_resultado = calcular_CB(n, 2);
     cout << fixed;
     cout << setprecision(5) << 1 - ((float) numerador_resultado / (float) denominador_resultado) << endl;
     return 0;
