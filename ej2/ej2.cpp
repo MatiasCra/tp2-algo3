@@ -11,6 +11,7 @@ vector<int> color;
 stack<int> procesados;
 int m = 0;
 int n = 0;
+bool es_raiz;
 
 void leer_input() {
     /*
@@ -27,7 +28,7 @@ void leer_input() {
     }
 }
 
-void dfs(int v, int marcar = 1, bool pushear = true) {
+void dfs(int v, int marcar = 1, bool transpuesta = false) {
     /*
      * Recorro por dfs el grafo recursivamente, marco los visitados con un color (número).
      * Si se indica, pusheo los nodos a un stack al terminar de procesarlos.
@@ -36,10 +37,12 @@ void dfs(int v, int marcar = 1, bool pushear = true) {
 
     for (int u: aristas[v]) {
         if (not color[u])
-            dfs(u, marcar, pushear);
+            dfs(u, marcar, transpuesta);
+        else if (transpuesta and color[u] != color[v])
+            es_raiz = false;
     }
 
-    if (pushear)
+    if (not transpuesta)
         procesados.push(v);
 }
 
@@ -54,44 +57,33 @@ int main() {
     }
 
     // Recorro D transpesto
-    color = vector<int>(n, 0);          // Reseteo colores
-    swap(aristas, aristas_invertidas);  // swapeo direcciones, O(1)
+    color = vector<int>(n, 0);  // Reseteo colores
+    aristas = std::move(aristas_invertidas);  // Reemplazo dirección, O(1)
 
     // Asigno un color distinto a cada componente fuertemente conexa.
+    list<int> res;  // Respuesta
     int componente = 0;  // color de la componente, incrementa en 1 antes de cada dfs
+    // Recorro en el orden topológico que dá el stack de procesados
     while (!procesados.empty()) {
         int v = procesados.top();
         procesados.pop();
+
+        // Si todavía no visite su cfc...
         if (color[v] == 0) {
-            dfs(v, ++componente, false);
+            // Asumo que es raiz
+            es_raiz = true;
+            // Recorro la cfc. Si encuentro una arista a un vertice de otra cfc, no es raiz (la arista va al revés en D)
+            dfs(v, ++componente, true);
+            if (es_raiz)
+                res.push_back(v);
         }
-    }
-    swap(aristas, aristas_invertidas);  // Recupero aristas originales
 
-    // Busco las raices del grafo de cfc (las cfc que no tienen entradas de otras cfc). Esas son en las que tengo que
-    // tirar una pieza.
-    vector<bool> es_raiz(componente, true);
-    for (int desde = 0; desde < n; ++desde) {
-        for (int hasta: aristas[desde]) {
-            if (color[desde] != color[hasta])
-                es_raiz[color[hasta] - 1] = false;
-        }
-    }
-
-    // Agrego una pieza por cfc raiz.
-    list<int> res;
-    vector<bool> cfc_en_res(componente, false);
-    for (int v = 0; v < n; ++v) {
-        if (es_raiz[color[v] - 1] and not cfc_en_res[color[v] - 1]) {
-            res.push_back(v);
-            cfc_en_res[color[v] - 1] = true;
-        }
     }
 
     // Output
     cout << res.size() << endl;
-    for (int v: res)
-        cout << v + 1 << " ";
+    for (auto v = prev(res.end()); v != res.end(); --v)
+        cout << *v + 1 << " ";
     cout << endl;
 
     return 0;
