@@ -19,7 +19,7 @@ int precio_UTP;
 int precio_FO;
 int comp_conexas;
 vector<tuple<int, int>> nodos;
-vector<tuple<double, int, int, TipoArista>> aristas;  // Costo, arista_1, arista_2, UTP o FO o MODEM
+vector<tuple<double, int, int, TipoArista>> aristas;  // Costo, arista_1, arista_2, UTP o FO
 
 struct DSU {
 
