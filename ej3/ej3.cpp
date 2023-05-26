@@ -21,9 +21,9 @@ int comp_conexas;
 vector<tuple<int, int>> nodos;
 vector<tuple<double, int, int, TipoArista>> aristas;  // Costo, arista_1, arista_2, UTP o FO
 
-struct DSU {
+struct DSU_PC_UBR {
 
-    DSU(int n) {
+    DSU_PC_UBR(int n) {
         padre = rank = vector<int>(n);
         for (int v = 0; v < n; v++) padre[v] = v;
     }
@@ -85,7 +85,7 @@ int main() {
         aristas.clear();
         obtener_aristas();
         sort(aristas.begin(), aristas.end());
-        DSU dsu(cant_oficinas);
+        DSU_PC_UBR dsu(cant_oficinas);
         double costo_UTP = 0;
         double costo_FO = 0;
         for (tuple<double, int, int, TipoArista> arista: aristas) {

@@ -5,9 +5,9 @@
 
 using namespace std;
 
-struct DSUSinOptimizar {
+struct DSU {
 
-    DSUSinOptimizar(int n) {
+    DSU(int n) {
         padre = vector<int>(n);
         for (int v = 0; v < n; v++) padre[v] = v;
     }
@@ -26,9 +26,9 @@ struct DSUSinOptimizar {
     vector<int> padre;
 };
 
-struct DSUSinUbR {
+struct DSU_PC {
 
-    DSUSinUbR(int n) {
+    DSU_PC(int n) {
         padre = vector<int>(n);
         for (int v = 0; v < n; v++) padre[v] = v;
     }
@@ -47,9 +47,9 @@ struct DSUSinUbR {
     vector<int> padre;
 };
 
-struct DSUSinPC {
+struct DSU_UBR {
 
-    DSUSinPC(int n) {
+    DSU_UBR(int n) {
         padre = rank = vector<int>(n);
         for (int v = 0; v < n; v++) padre[v] = v;
     }
@@ -71,9 +71,9 @@ struct DSUSinPC {
     vector<int> rank;
 };
 
-struct DSU {
+struct DSU_PC_UBR {
 
-    DSU(int n) {
+    DSU_PC_UBR(int n) {
         padre = rank = vector<int>(n);
         for (int v = 0; v < n; v++) padre[v] = v;
     }
