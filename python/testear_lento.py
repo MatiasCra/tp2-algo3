@@ -43,16 +43,14 @@ def correr_test(metodo: int, archivo_testear: Path) -> tuple[float, ...]:
 
 
 for archivo_tests in archivos_tests:
-    tiempos = [[]] * 5
-    features = [[]] * 5
-    with ThreadPoolExecutor() as executor:
-        for j in range(5):
-            features[j] = [
-                executor.submit(correr_test, j, archivo_tests)
-                for i in range(VECES_TESTEAR)
-            ]
+    tiempos_medidos = [[], [], [], [], []]
 
-    tiempos = [np.mean([feature.result() for feature in features[j]]) for j in range(5)]
+    for i in range(5):
+        for _ in range(VECES_TESTEAR):
+            tiempos_medidos[i].append(correr_test(i, archivo_tests))
+    
+    # tiempos = [np.mean([feature.result() for feature in features[j]]) for j in range(5)]
+    tiempos = [np.mean(tiempos_medidos[i]) for i in range(5)]
 
     print(leer_tamano(archivo_tests))
     for tiempo in tiempos:
